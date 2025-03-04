@@ -2,29 +2,27 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
 
-
-
 import { useRouter } from 'expo-router';
 
-const SignIn = () => {
-  const { login } = useContext(AuthContext);
+const SignUp = () => {
+  const { register } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); // Para navegar entre pantallas
+  const router = useRouter();
 
-  const handleLogin = async () => {
-    const success = await login(email, password);
-    if (success) {
-      Alert.alert('Éxito', 'Inicio de sesión correcto');
-      router.push('/'); // Redirige a la pantalla principal
-    } else {
-      Alert.alert('Error', 'Credenciales incorrectas');
+  const handleRegister = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+      return;
     }
+    await register(email, password);
+    Alert.alert('Éxito', 'Usuario registrado correctamente');
+    router.push('/sign-in'); // Redirige a la pantalla de login
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Iniciar Sesión</Text>
+      <Text style={styles.title}>Registro</Text>
       <TextInput
         placeholder="Correo electrónico"
         onChangeText={setEmail}
@@ -39,8 +37,8 @@ const SignIn = () => {
         value={password}
         style={styles.input}
       />
-      <Button title="Ingresar" onPress={handleLogin} />
-      <Button title="Registrarse" onPress={() => router.push('/sign-up')} />
+      <Button title="Registrarse" onPress={handleRegister} />
+      <Button title="Ir a Login" onPress={() => router.push('/sign-in')} />
     </View>
   );
 };
@@ -51,4 +49,4 @@ const styles = StyleSheet.create({
   input: { borderBottomWidth: 1, marginBottom: 10, padding: 8 },
 });
 
-export default SignIn;
+export default SignUp;
