@@ -1,24 +1,35 @@
-import React, { useContext } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
+import { useSession } from "../../ctx";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { View, Text, Button, ActivityIndicator } from "react-native";
 
-import { useRouter } from 'expo-router';
-
-const Home = () => {
-  const { user, logout } = useContext(AuthContext);
+export default function Index() {
+  const { session, signOut, isLoading } = useSession();
   const router = useRouter();
 
+  
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Cargando sesión...</Text>
+      </View>
+    );
+  }
+
+  useEffect(() => {
+    if (!session) {
+      console.log("🔄 No hay sesión activa. Redirigiendo al login...");
+      router.replace("/sign-in"); 
+    }
+  }, [session]);
+
+  
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido, {user?.email}</Text>
-      <Button title="Cerrar Sesión" onPress={() => { logout(); router.push('/sign-in'); }} />
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold" }}>¡Bienvenido!</Text>
+      <Text>Funciona!: {session?.email}</Text>
+      <Button title="Cerrar sesión" onPress={() => signOut()} />
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-});
-
-export default Home;
+}

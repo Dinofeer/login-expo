@@ -1,24 +1,43 @@
-import React, { useState, useContext } from 'react';
+import { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
-
-
-
+import { useSession } from '../ctx';
 import { useRouter } from 'expo-router';
 
-const SignIn = () => {
-  const { login } = useContext(AuthContext);
+export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); // Para navegar entre pantallas
+  const { signIn } = useSession();
+  const router = useRouter();
 
-  const handleLogin = async () => {
-    const success = await login(email, password);
-    if (success) {
-      Alert.alert('Éxito', 'Inicio de sesión correcto');
-      router.push('/'); // Redirige a la pantalla principal
+  const handleLogin = () => {
+    console.log("🔍 Intentando iniciar sesión con:", `"${email}"`, `"${password}"`);
+
+    if (!email || !password) {
+      Alert.alert("Error", "Por favor ingresa tu correo y contraseña");
+      return;
+    }
+
+    const emailNormalized = email.trim().toLowerCase();
+    const passwordNormalized = password.trim();
+
+    
+    if (emailNormalized === "usuario@ejemplo.com" && passwordNormalized === "password123") {
+      console.log(" Credenciales correctas, guardando sesión...");
+
+      const success = signIn(email, password);
+      
+      if (success) {
+        
+        Alert.alert("Éxito", "Inicio de sesión correcto", [
+          { text: "OK", onPress: () => router.replace('/') } //
+        ]);
+      } else {
+        
+        Alert.alert("Error", "No se pudo guardar la sesión");
+      }
     } else {
-      Alert.alert('Error', 'Credenciales incorrectas');
+      
+      Alert.alert("Error", "Correo o contraseña incorrectos");
     }
   };
 
@@ -26,29 +45,49 @@ const SignIn = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Iniciar Sesión</Text>
       <TextInput
-        placeholder="Correo electrónico"
+        style={styles.input}
+        placeholder="Correo"
+        placeholderTextColor="#666"
         onChangeText={setEmail}
         value={email}
-        style={styles.input}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
       <TextInput
+        style={styles.input}
         placeholder="Contraseña"
+        placeholderTextColor="#666"
         secureTextEntry
         onChangeText={setPassword}
         value={password}
-        style={styles.input}
       />
-      <Button title="Ingresar" onPress={handleLogin} />
-      <Button title="Registrarse" onPress={() => router.push('/sign-up')} />
+      <Button title="Ingresar" onPress={handleLogin} color="#007bff" />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  input: { borderBottomWidth: 1, marginBottom: 10, padding: 8 },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5', 
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+  },
+  input: {
+    width: '80%',
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+    paddingLeft: 10,
+    borderRadius: 5,
+  },
 });
-
-export default SignIn;
